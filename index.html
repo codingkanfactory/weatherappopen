@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AUQI Weather App</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Replaced Feather Icons with Google Material Icons -->
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons|Material+Icons+Outlined|Material+Icons+Round" rel="stylesheet">
+    <!-- Custom Tailwind Config -->
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        teal: {
+                            50: '#f0fdfa',
+                            100: '#ccfbf1',
+                            200: '#99f6e4',
+                            300: '#5eead4',
+                            400: '#2dd4bf',
+                            500: '#14b8a6',
+                            600: '#0d9488',
+                            700: '#0f766e',
+                            800: '#115e59',
+                            900: '#134e4a',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="min-h-screen bg-gradient-to-br from-teal-50 via-teal-100/50 to-white dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 transition-colors duration-500">
+    
+    <!-- ==================== INTRO PAGE ==================== -->
+    <div id="introPage" class="fixed inset-0 z-50 bg-gradient-to-br from-teal-600 via-teal-500 to-cyan-400 flex items-center justify-center">
+        <div class="text-center px-6 max-w-md mx-auto animate-fade-in">
+            <!-- Logo -->
+            <div class="w-24 h-24 mx-auto mb-8 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center shadow-2xl">
+                <!-- Using Material Icon for cloud -->
+                <span class="material-icons-round text-white" style="font-size: 56px;">cloud</span>
+            </div>
+            
+            <!-- Welcome Text -->
+            <h1 class="text-3xl md:text-4xl font-bold text-white mb-4">Selamat Datang di<br><span class="text-teal-100">Weather App</span></h1>
+            <p class="text-teal-100 mb-10 text-lg">Izinkan lokasi Anda atau cari lokasi secara manual untuk melihat prakiraan cuaca</p>
+            
+            <!-- Location Button -->
+            <!-- Using Material Icon for location -->
+            <button id="introLocationBtn" class="w-full py-4 px-6 bg-white text-teal-600 font-bold rounded-2xl shadow-xl hover:shadow-2xl hover:scale-105 transition-all duration-300 flex items-center justify-center gap-3 mb-4">
+                <span class="material-icons-round text-2xl">my_location</span>
+                <span>Gunakan Lokasi Saya</span>
+            </button>
+            
+            <!-- Divider -->
+            <div class="flex items-center gap-4 my-6">
+                <div class="flex-1 h-px bg-white/30"></div>
+                <span class="text-white/70 text-sm">atau</span>
+                <div class="flex-1 h-px bg-white/30"></div>
+            </div>
+            
+            <!-- Search Input -->
+            <div class="relative">
+                <input 
+                    type="text" 
+                    id="introSearchInput" 
+                    placeholder="Cari nama kota..." 
+                    class="w-full py-4 px-6 pl-14 bg-white/20 backdrop-blur-sm text-white placeholder-white/70 rounded-2xl border-2 border-white/30 focus:border-white focus:outline-none transition-all duration-300"
+                >
+                <!-- Using Material Icon for search -->
+                <span class="material-icons-round absolute left-5 top-1/2 -translate-y-1/2 text-white/70">search</span>
+                <button id="introSearchBtn" class="absolute right-2 top-1/2 -translate-y-1/2 py-2 px-4 bg-white text-teal-600 font-semibold rounded-xl hover:bg-teal-50 transition-colors">
+                    Cari
+                </button>
+            </div>
+            
+            <!-- Error Message on Intro -->
+            <p id="introError" class="text-red-200 mt-4 hidden"></p>
+        </div>
+    </div>
+
+    <!-- ==================== MAIN APP ==================== -->
+    <div id="mainApp" class="hidden min-h-screen">
+        
+        <!-- Header with Location -->
+        <header class="sticky top-0 z-40 backdrop-blur-md bg-white/70 dark:bg-gray-900/70 shadow-sm">
+            <div class="max-w-xl mx-auto px-4 py-3 flex items-center justify-between">
+                <!-- Location Info -->
+                <div class="flex items-center gap-2">
+                    <h1 id="cityName" class="text-lg font-bold text-gray-800 dark:text-white">-</h1>
+                    <span id="countryName" class="text-sm text-gray-500 dark:text-gray-400"></span>
+                </div>
+                
+                <!-- Action Buttons -->
+                <!-- Using Material Icons for header buttons -->
+                <div class="flex items-center gap-1">
+                    <!-- Search Toggle -->
+                    <button id="searchToggle" class="p-2 rounded-full hover:bg-teal-100 dark:hover:bg-gray-700 transition-colors">
+                        <span class="material-icons-round text-teal-600 dark:text-teal-400" style="font-size: 22px;">search</span>
+                    </button>
+                    
+                    <!-- Recalibrate Location -->
+                    <button id="locationBtn" class="p-2 rounded-full hover:bg-teal-100 dark:hover:bg-gray-700 transition-colors" title="Perbarui Lokasi">
+                        <span class="material-icons-round text-teal-600 dark:text-teal-400" style="font-size: 22px;">my_location</span>
+                    </button>
+                    
+                    <!-- Dark Mode Toggle -->
+                    <button id="darkModeToggle" class="p-2 rounded-full hover:bg-teal-100 dark:hover:bg-gray-700 transition-colors">
+                        <span id="sunIcon" class="material-icons-round text-teal-400 hidden dark:block" style="font-size: 22px;">light_mode</span>
+                        <span id="moonIcon" class="material-icons-round text-teal-600 dark:hidden" style="font-size: 22px;">dark_mode</span>
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Search Bar (Collapsible) -->
+            <div id="searchBar" class="hidden max-w-xl mx-auto px-4 pb-3">
+                <div class="relative">
+                    <input 
+                        type="text" 
+                        id="searchInput" 
+                        placeholder="Cari kota..." 
+                        class="w-full py-3 px-5 pl-12 bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-white rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500 transition-all"
+                    >
+                    <span class="material-icons-round absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" style="font-size: 20px;">search</span>
+                    <button id="searchBtn" class="absolute right-2 top-1/2 -translate-y-1/2 py-1.5 px-4 bg-teal-500 text-white rounded-lg hover:bg-teal-600 transition-colors text-sm font-medium">
+                        Cari
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="max-w-xl mx-auto px-4 py-6 pb-24">
+            
+            <!-- Loading Skeleton -->
+            <div id="loadingSkeleton" class="hidden space-y-6">
+                <!-- Current Weather Skeleton -->
+                <div class="glass-card rounded-3xl p-6 animate-pulse">
+                    <div class="flex items-center justify-between">
+                        <div class="space-y-3">
+                            <div class="h-16 w-32 bg-gray-200 dark:bg-gray-700 rounded-xl"></div>
+                            <div class="h-4 w-24 bg-gray-200 dark:bg-gray-700 rounded"></div>
+                            <div class="h-4 w-20 bg-gray-200 dark:bg-gray-700 rounded"></div>
+                        </div>
+                        <div class="h-24 w-24 bg-gray-200 dark:bg-gray-700 rounded-full"></div>
+                    </div>
+                </div>
+                <!-- Details Skeleton -->
+                <div class="glass-card rounded-3xl p-6 animate-pulse">
+                    <div class="grid grid-cols-3 gap-4">
+                        <div class="h-20 bg-gray-200 dark:bg-gray-700 rounded-xl"></div>
+                        <div class="h-20 bg-gray-200 dark:bg-gray-700 rounded-xl"></div>
+                        <div class="h-20 bg-gray-200 dark:bg-gray-700 rounded-xl"></div>
+                        <div class="h-20 bg-gray-200 dark:bg-gray-700 rounded-xl"></div>
+                        <div class="h-20 bg-gray-200 dark:bg-gray-700 rounded-xl"></div>
+                        <div class="h-20 bg-gray-200 dark:bg-gray-700 rounded-xl"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Weather Content -->
+            <div id="weatherContent" class="space-y-6">
+                
+                <!-- ===== A. CURRENT WEATHER CARD ===== -->
+                <section id="currentWeather" class="glass-card rounded-3xl p-6 shadow-xl opacity-0 translate-y-4 transition-all duration-500">
+                    <div class="flex items-center justify-between">
+                        <!-- Left: Temperature & Condition -->
+                        <div>
+                            <div class="flex items-start">
+                                <span id="currentTemp" class="text-7xl font-bold text-gray-800 dark:text-white">--</span>
+                                <button id="unitToggle" class="text-2xl font-medium text-teal-500 hover:text-teal-600 transition-colors mt-2">°C</button>
+                            </div>
+                            <p id="weatherDesc" class="text-gray-500 dark:text-gray-400 capitalize mt-1 text-lg">--</p>
+                            <div class="flex items-center gap-4 mt-2 text-sm text-gray-500 dark:text-gray-400">
+                                <span id="feelsLike">Terasa --°</span>
+                                <span>|</span>
+                                <span id="tempRange">H:--° L:--°</span>
+                            </div>
+                        </div>
+                        
+                        <!-- Right: Weather Icon -->
+                        <div class="relative">
+                            <div class="absolute inset-0 bg-gradient-to-br from-teal-400/20 to-cyan-400/20 rounded-full blur-xl"></div>
+                            <!-- Weather icon container using Material Icon -->
+                            <div id="weatherIcon" class="relative w-24 h-24 flex items-center justify-center animate-float">
+                                <span class="material-icons-round text-amber-400" style="font-size: 80px;">wb_sunny</span>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- ===== B. WEATHER DETAILS GRID 3x2 ===== -->
+                <!-- Centered text layout with Material Icons -->
+                <section id="detailsGrid" class="glass-card rounded-3xl p-4 shadow-xl opacity-0 translate-y-4 transition-all duration-500">
+                    <div class="grid grid-cols-3 gap-3">
+                        <!-- Humidity -->
+                        <div class="detail-card text-center py-4">
+                            <span class="material-icons-round text-blue-500 mb-2" style="font-size: 24px;">water_drop</span>
+                            <p class="text-xs text-gray-500 dark:text-gray-400">Kelembapan</p>
+                            <p id="humidity" class="text-lg font-bold text-gray-800 dark:text-white">--%</p>
+                        </div>
+                        
+                        <!-- Wind -->
+                        <div class="detail-card text-center py-4">
+                            <span class="material-icons-round text-teal-500 mb-2" style="font-size: 24px;">air</span>
+                            <p class="text-xs text-gray-500 dark:text-gray-400">Angin</p>
+                            <p id="wind" class="text-lg font-bold text-gray-800 dark:text-white">-- km/h</p>
+                        </div>
+                        
+                        <!-- Pressure -->
+                        <div class="detail-card text-center py-4">
+                            <span class="material-icons-round text-purple-500 mb-2" style="font-size: 24px;">speed</span>
+                            <p class="text-xs text-gray-500 dark:text-gray-400">Tekanan</p>
+                            <p id="pressure" class="text-lg font-bold text-gray-800 dark:text-white">-- hPa</p>
+                        </div>
+                        
+                        <!-- Visibility -->
+                        <div class="detail-card text-center py-4">
+                            <span class="material-icons-round text-amber-500 mb-2" style="font-size: 24px;">visibility</span>
+                            <p class="text-xs text-gray-500 dark:text-gray-400">Visibilitas</p>
+                            <p id="visibility" class="text-lg font-bold text-gray-800 dark:text-white">-- km</p>
+                        </div>
+                        
+                        <!-- Clouds -->
+                        <div class="detail-card text-center py-4">
+                            <span class="material-icons-round text-gray-500 mb-2" style="font-size: 24px;">cloud</span>
+                            <p class="text-xs text-gray-500 dark:text-gray-400">Awan</p>
+                            <p id="clouds" class="text-lg font-bold text-gray-800 dark:text-white">--%</p>
+                        </div>
+                        
+                        <!-- Dew Point -->
+                        <div class="detail-card text-center py-4">
+                            <span class="material-icons-round text-cyan-500 mb-2" style="font-size: 24px;">thermostat</span>
+                            <p class="text-xs text-gray-500 dark:text-gray-400">Titik Embun</p>
+                            <p id="dewPoint" class="text-lg font-bold text-gray-800 dark:text-white">--°</p>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- ===== C. 5 DAY FORECAST - HORIZONTAL SCROLL CENTER ===== -->
+                <!-- Horizontal scroll with center layout -->
+                <section id="dailyForecast" class="glass-card rounded-3xl p-4 shadow-xl opacity-0 translate-y-4 transition-all duration-500">
+                    <h3 class="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-3 px-2">Prakiraan 5 Hari</h3>
+                    <div id="dailyContainer" class="flex gap-3 overflow-x-auto pb-2 scrollbar-thin snap-x snap-mandatory justify-start md:justify-center">
+                        <!-- Daily cards will be inserted here -->
+                    </div>
+                </section>
+
+                <!-- ===== D. SUN DIAGRAM ===== -->
+                <section id="sunSection" class="glass-card rounded-3xl p-5 shadow-xl opacity-0 translate-y-4 transition-all duration-500">
+                    <h3 class="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-4">Matahari</h3>
+                    
+                    <!-- Sun Arc Diagram -->
+                    <div class="relative h-32 mb-4">
+                        <!-- Arc Background -->
+                        <svg class="w-full h-full" viewBox="0 0 200 100" preserveAspectRatio="xMidYMax meet">
+                            <!-- Background Arc -->
+                            <path 
+                                d="M 10 95 Q 100 -10 190 95" 
+                                fill="none" 
+                                stroke="#e5e7eb" 
+                                stroke-width="3"
+                                stroke-linecap="round"
+                                class="dark:stroke-gray-700"
+                            />
+                            <!-- Progress Arc -->
+                            <path 
+                                id="sunArcProgress"
+                                d="M 10 95 Q 100 -10 190 95" 
+                                fill="none" 
+                                stroke="url(#sunGradient)" 
+                                stroke-width="3"
+                                stroke-linecap="round"
+                                stroke-dasharray="250"
+                                stroke-dashoffset="250"
+                            />
+                            <!-- Gradient Definition -->
+                            <defs>
+                                <linearGradient id="sunGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                                    <stop offset="0%" style="stop-color:#f59e0b"/>
+                                    <stop offset="50%" style="stop-color:#fbbf24"/>
+                                    <stop offset="100%" style="stop-color:#f97316"/>
+                                </linearGradient>
+                            </defs>
+                            <!-- Sun Indicator -->
+                            <circle id="sunIndicator" cx="10" cy="95" r="8" fill="#fbbf24"/>
+                        </svg>
+                    </div>
+                    
+                    <!-- Sun Times -->
+                    <!-- Using Material Icons for sunrise/sunset -->
+                    <div class="flex justify-between items-center px-4">
+                        <div class="text-center">
+                            <span class="material-icons-round text-amber-500 mb-1" style="font-size: 28px;">wb_twilight</span>
+                            <p class="text-xs text-gray-500 dark:text-gray-400">Terbit</p>
+                            <p id="sunrise" class="font-bold text-gray-800 dark:text-white">--:--</p>
+                        </div>
+                        <div class="text-center">
+                            <p class="text-xs text-gray-500 dark:text-gray-400">Durasi Siang</p>
+                            <p id="daylightDuration" class="font-bold text-teal-600 dark:text-teal-400">-- jam -- menit</p>
+                        </div>
+                        <div class="text-center">
+                            <span class="material-icons-round text-orange-500 mb-1" style="font-size: 28px;">nights_stay</span>
+                            <p class="text-xs text-gray-500 dark:text-gray-400">Terbenam</p>
+                            <p id="sunset" class="font-bold text-gray-800 dark:text-white">--:--</p>
+                        </div>
+                    </div>
+                </section>
+
+            </div>
+        </main>
+
+        <!-- Footer -->
+       <p class="text-center text-sm text-gray-700 mt-10">
+  <a href="https://openweathermap.org/api" 
+     target="_blank" 
+     class="text-teal-600 font-semibold underline hover:text-teal-800 transition">
+     AUQI X Open Weather API
+  </a>
+</p>
+
+    <!-- Error Toast -->
+    <div id="errorToast" class="fixed bottom-20 left-4 right-4 max-w-xl mx-auto bg-red-500 text-white px-4 py-3 rounded-2xl shadow-xl hidden transform translate-y-4 opacity-0 transition-all duration-300 z-50">
+        <div class="flex items-center justify-between gap-3">
+            <!-- Using Material Icon for error alert -->
+            <span class="material-icons-round flex-shrink-0" style="font-size: 22px;">error</span>
+            <p id="errorText" class="flex-1 text-sm">Error message</p>
+            <button id="closeError" class="p-1 hover:bg-red-400 rounded-full">
+                <span class="material-icons-round" style="font-size: 18px;">close</span>
+            </button>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
