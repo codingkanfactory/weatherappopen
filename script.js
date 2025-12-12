@@ -3,7 +3,7 @@
 // ============================================
 
 // API Configuration
-const API_KEY = "97dd466991784c1f9b47af19ef9b6f02"
+const API_KEY = ""
 const BASE_URL = "https://api.openweathermap.org/data/2.5"
 
 // State
