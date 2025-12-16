@@ -15,13 +15,29 @@
   border: 1px solid rgba(75, 85, 99, 0.3);
 }
 
-/* Updated detail card with centered text */
+/* Detail card styling */
 .detail-card {
-  @apply flex flex-col items-center justify-center p-4 bg-gray-50 dark:bg-gray-700/50 rounded-2xl transition-all duration-300;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  background-color: rgb(249 250 251);
+  border-radius: 1rem;
+  transition: all 0.3s ease;
+}
+
+.dark .detail-card {
+  background-color: rgba(55, 65, 81, 0.5);
 }
 
 .detail-card:hover {
-  @apply bg-teal-50 dark:bg-teal-900/30 transform scale-105;
+  background-color: rgb(240 253 250);
+  transform: scale(1.05);
+}
+
+.dark .detail-card:hover {
+  background-color: rgba(13, 148, 136, 0.2);
 }
 
 /* Floating animation */
@@ -55,31 +71,18 @@
   animation: fadeIn 0.6s ease-out forwards;
 }
 
-/* Section visibility */
-section.visible {
-  opacity: 1 !important;
-  transform: translateY(0) !important;
+/* Spin animation for loading */
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
 }
 
-/* Daily card styles for horizontal scroll */
-.daily-card {
-  @apply flex-shrink-0 flex flex-col items-center justify-center p-4 bg-gray-50 dark:bg-gray-700/30 rounded-2xl transition-all duration-300 min-w-[80px];
+.animate-spin {
+  animation: spin 1s linear infinite;
 }
 
-.daily-card:hover {
-  @apply bg-teal-50 dark:bg-teal-900/20 transform scale-105;
-}
-
-.daily-card.today {
-  @apply bg-teal-100 dark:bg-teal-800/40 border-2 border-teal-400;
-}
-
-/* Temperature bar gradient */
-.temp-bar {
-  @apply h-1 rounded-full bg-gradient-to-r from-teal-400 to-orange-400;
-}
-
-/* Pulse animation for loading */
+/* Pulse animation */
 @keyframes pulse {
   0%,
   100% {
@@ -94,28 +97,7 @@ section.visible {
   animation: pulse 1.5s ease-in-out infinite;
 }
 
-/* Shimmer effect */
-@keyframes shimmer {
-  0% {
-    background-position: -200% 0;
-  }
-  100% {
-    background-position: 200% 0;
-  }
-}
-
-.shimmer {
-  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
-  background-size: 200% 100%;
-  animation: shimmer 1.5s infinite;
-}
-
-.dark .shimmer {
-  background: linear-gradient(90deg, #374151 25%, #4b5563 50%, #374151 75%);
-  background-size: 200% 100%;
-}
-
-/* Custom scrollbar for horizontal scroll */
+/* Custom scrollbar */
 .scrollbar-thin::-webkit-scrollbar {
   height: 4px;
 }
@@ -156,31 +138,14 @@ button:active {
   transform: scale(0.95);
 }
 
-/* Smooth transitions */
-* {
-  transition-property: background-color, border-color, color, opacity, transform;
-  transition-timing-function: ease;
-  transition-duration: 200ms;
-}
-
 /* Sun arc glow */
 #sunIndicator {
   filter: drop-shadow(0 0 6px rgba(251, 191, 36, 0.6));
 }
 
-/* Error toast animation */
-#errorToast.show {
-  transform: translateY(0);
-  opacity: 1;
-}
-
 /* Responsive adjustments */
 @media (max-width: 480px) {
   .detail-card {
-    @apply p-3;
-  }
-
-  .daily-card {
-    @apply min-w-[70px] p-3;
+    padding: 0.75rem;
   }
 }
